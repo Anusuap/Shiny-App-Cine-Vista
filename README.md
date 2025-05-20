@@ -1,11 +1,45 @@
-# Shiny-App-Cine-Vista
-# Movie Analysis
-This project focuses on analyzing the top 300 movies from Rotten Tomatoes and developing an interactive Shiny application using R. The app enables users to search for movies of their choice, view detailed information, rate them, and leave comments. The dataset includes key attributes such as movie title, director, release year, runtime, Tomato score, Popcorn score, number of ratings, number of reviews, and genre.
-# Content 
-code : scraping code and data cleaning code /n
-shiny app : the R shiny code
-presentation : ppt file exploring our detailed analysis
-report : R Quarto file containing all the details of data analysis 
-# Instructions to run the code
-The scraping and data cleaning code may not work in case the page is changed .
-If while running the code you run into there is no package called .... error then kindly run the Required_packages.R file first to download required packages used in the code.
+# 🎬 Shiny App: Cine-Vista  
+## 📊 Movie Analysis of Top 300 Rotten Tomatoes Films
+
+This project presents an analysis of the top 300 movies from Rotten Tomatoes through an interactive Shiny application built using R. The app allows users to:
+
+- Search and explore movies of their choice  
+- View detailed movie information  
+- Rate movies and leave comments  
+
+The dataset includes the following key features:
+
+- Movie Title  
+- Director  
+- Release Year  
+- Runtime  
+- Tomato Score  
+- Popcorn Score  
+- Number of Ratings  
+- Number of Reviews  
+- Genre  
+
+---
+
+## 📁 Project Structure
+
+- **`code/`**: Contains the web scraping and data cleaning scripts  
+- **`shiny_app/`**: R Shiny code for building the interactive app  
+- **`presentation/`**: PowerPoint presentation with detailed insights and analysis  
+- **`report/`**: R Quarto file with a comprehensive data analysis report  
+
+---
+
+## 🛠 Instructions to Run the Code
+
+1. **Install Required Packages**  
+   If you encounter an error like:  
+   `there is no package called ...`  
+   then please run the `Required_packages.R` file first to install all necessary packages.
+
+2. **Note on Web Scraping**  
+   The scraping and data cleaning scripts may not function properly if the structure of the Rotten Tomatoes website changes.
+
+---
+
+Feel free to explore, contribute, and suggest improvements!
