@@ -36,6 +36,8 @@ print(df)
 View(df)
 head(df)
 names(df)
+save(df, file = "df.RData")
+
 
 
 
