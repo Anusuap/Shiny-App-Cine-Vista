@@ -1,1 +1,169 @@
+# loading the websites 
+
+html=read_html("https://editorial.rottentomatoes.com/guide/best-movies-of-all-time/")
+html1=read_html("https://editorial.rottentomatoes.com/guide/best-movies-of-all-time/2/")
+
+websites = html %>%
+  html_elements(".title") %>%
+  html_attr("href")
+websites = websites[1:300]
+
+# extracting the tomato score,popcorn score,reviews,ratings,genre
+
+
+# Initialize vectors to store movie data
+
+movie = vector("list", length = 300)
+movie_runtime = vector("list", length = 300)
+movie_tomato_score = vector("list", length = 300)
+movie_popcorn_score = vector("list", length = 300)
+movie_reviews = vector("list", length = 300)
+movie_ratings = vector("list", length = 300)
+movie_genre = vector("list", length = 300)
+
+
+# Loop through each movie
+for(i in 1:300) {
+  movie[[i]] = read_html(websites[i])
+  
+  # Movie runtime (adjusted selector for runtime)
+  movie_runtime[[i]] <- movie[[i]] %>%
+    html_elements('rt-text[slot="metadataProp"][context="label"]') %>%
+    html_text(trim = TRUE)
+  if(length(movie_runtime[[i]]) >= 3) {
+    movie_runtime[[i]] = movie_runtime[[i]][3] # Select the correct part
+  }
+  
+  # Movie tomato score (adjusted selector for critics score)
+  movie_tomato_score[[i]] <- movie[[i]] %>%
+    html_elements('rt-text[slot="criticsScore"]') %>%
+    html_text(trim = TRUE)
+  if(length(movie_tomato_score[[i]]) >= 1) {
+    movie_tomato_score[[i]] = movie_tomato_score[[i]][1] # Select the first item
+  }
+  
+  # Movie popcorn score (adjusted selector for audience score)
+  movie_popcorn_score[[i]] <- movie[[i]] %>%
+    html_elements("rt-text[slot='audienceScore']") %>%
+    html_text(trim = TRUE)
+  if(length(movie_popcorn_score[[i]]) >= 1) {
+    movie_popcorn_score[[i]] = movie_popcorn_score[[i]][1] # Select the first item
+  }
+  
+  # Movie reviews (fix to extract the number of reviews)
+  movie_reviews[[i]] <- movie[[i]] %>%
+    html_elements("rt-link[slot='criticsReviews']") %>%
+    html_text(trim = TRUE) %>%
+    gsub("[^0-9]", "", .)  # Remove all non-numeric characters
+  
+  # Movie ratings (extract audience review counts)
+  movie_ratings[[i]] <- movie[[i]] %>%
+    html_elements("rt-link[slot='audienceReviews']") %>%
+    html_text(trim = TRUE) %>%
+    gsub("[^0-9]", "", .)
+  
+  # Movie genre (you can check for genre selectors here)
+  movie_genre[[i]] <- movie[[i]] %>%
+    html_elements("rt-text[slot='metadataGenre']") %>%
+    html_text(trim = TRUE)
+}
+
+
+# Filter only the runtime in h and m format (e.g., "1h 45m", "2h 30m")
+
+for(i in 1:300) {
+  # Extract the runtime and filter the format containing hours and minutes
+  runtime = movie_runtime[[i]]
+  
+  # Use regular expressions to find the runtime in "Xh Ym" format
+  if(length(runtime) > 0) {
+    movie_runtime[[i]] = grep("\\d+h \\d+m", runtime, value = TRUE)
+  }
+}
+
+
+# Check the results 
+
+movie_runtime
+movie_tomato_score
+movie_popcorn_score
+movie_reviews
+movie_ratings
+movie_genre
+
+# extracting movie names and director names and rankings and release year
+
+# movie names
+
+movie_names=html%>%html_elements(".title")%>%html_text()
+movie_names=movie_names[1:300]
+movie_names
+
+# movie director names
+
+movie_directors1=html%>%html_elements(".info.director")%>%html_text()
+stripped <- str_replace(movie_directors1, ".*Directed By:\\s*", "")
+cleaned <- str_replace_all(stripped, "[\\t\\n]", "")
+final_directors <- str_trim(cleaned)
+movie_directors1=final_directors
+movie_directors1
+
+movie_directors2=html1%>%html_elements(".info.director")%>%html_text()
+stripped <- str_replace(movie_directors2, ".*Directed By:\\s*", "")
+cleaned <- str_replace_all(stripped, "[\\t\\n]", "")
+final_directors <- str_trim(cleaned)
+movie_directors2=final_directors
+movie_directors2
+
+
+
+movie_directors=c(movie_directors1,movie_directors2)
+movie_directors
+
+# movie rankings
+
+ranks=html%>%html_elements("td[style='width: 10%; height: 23px; text-align: center;']")%>%html_text(trim=TRUE)
+rankings=as.numeric(gsub("\\.","",ranks))
+rankings
+
+# movie release year
+
+movie_year=html%>%html_elements(".year")%>%html_text()
+movie_year=substr(movie_year,2,5)
+movie_year
+
+
+
+# unlisting the vectors
+movie_names <- unlist(movie_names)
+movie_directors <- unlist(movie_directors)
+movie_runtime <- unlist(movie_runtime)
+movie_tomato_score <- unlist(movie_tomato_score)
+
+movie_popcorn_score<-unlist(movie_popcorn_score)
+movie_reviews <- unlist(movie_reviews)
+movie_ratings <- unlist(movie_ratings)
+movie_genre_str <- sapply(movie_genre, function(g) paste(g, collapse = ", "))
+
+
+
+# If all lengths are the same, proceed with creating the data frame
+project <- data.frame(
+  `Rank`=rankings,
+  `Name` = movie_names,
+  `Director` = movie_directors,
+  `Release Year`=movie_year,
+  `Runtime` = movie_runtime,
+  `Tomato Score` = movie_tomato_score,
+  `Popcorn Score` = movie_popcorn_score,
+  `No of Reviews` = movie_reviews,
+  `No of Ratings`=movie_ratings,
+  `Genre`=movie_genre_str
+  
+)
+View(project)
+save(project, file = "Project.RData")
+head(project)
+
+
 
