@@ -1,0 +1,48 @@
+# Assuming df is your dataset
+
+df=project
+df
+head(df)
+
+# Clean the runtime column to extract hours and minutes and calculate total runtime in minutes
+df <- df %>%
+  mutate(
+    # Extract total runtime in minutes
+    `total_runtime(in minutes)` = 
+      ifelse(!is.na(str_extract(Runtime, "\\d+(?=h)")), as.numeric(str_extract(Runtime, "\\d+(?=h)")) * 60, 0) + 
+      ifelse(!is.na(str_extract(Runtime, "\\d+(?=m)")), as.numeric(str_extract(Runtime, "\\d+(?=m)")), 0),
+    
+    # Clean Tomato.Score and Popcorn.Score to numeric
+    Tomato.Score = as.numeric(str_replace(Tomato.Score, "%", "")),
+    Popcorn.Score = as.numeric(str_replace(Popcorn.Score, "%", "")),
+    
+    # Ensure No.of.Reviews and No.of.Ratings are numeric
+    `No.of.Reviews` = as.numeric(`No.of.Reviews`),
+    `No.of.Ratings` = as.numeric(`No.of.Ratings`),
+    
+    # Convert Release.Year to numeric
+    `Release.Year` = as.numeric(`Release.Year`),
+    
+    # Clean Genre by trimming spaces
+    Genre = str_trim(Genre)
+  )
+
+# Check for any missing values and handle them (optional, depending on your needs)
+df <- df %>%
+  drop_na()  # Removes rows with any missing values
+
+# View the cleaned data
+print(df)
+View(df)
+head(df)
+names(df)
+
+
+
+
+
+
+
+
+
+
