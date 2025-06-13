@@ -1,1 +1,215 @@
+---
+title: "Shiny-App-Cine-Vista-Report"
+format: html
+editor: visual
+author: Anusua Paul
+---
 
+## 🎬 Introduction
+
+In the golden age of cinema, films have not only entertained but also shaped cultures and defined generations. With hundreds of iconic movies across genres and eras, understanding what makes a film stand out is both an art and a science. This project presents an interactive **Shiny app** exploring the **Top 300 critically and popularly acclaimed movies** worldwide. Through this platform, users can examine trends across release years, genres, directors, ratings, reviews, and runtimes—while also engaging by **rating and commenting** on their favorite films.
+
+## 🎯 Motivation & Objective
+
+The motivation behind this project stems from a desire to blend cinematic appreciation with the power of data analytics. By analyzing the most acclaimed movies, we aim to uncover the patterns and characteristics that define a film's success—whether it's the influence of a particular director, a genre’s popularity in certain decades, or how ratings and reviews correlate with runtime and audience response. At the same time, the app provides a dynamic space for users to interact with the data, offering their own ratings and comments, making the exploration both insightful and participatory.
+
+### 🎥 Key Questions We Explore
+
+-   🕰️ **When did the magic happen?**\
+    Are there time periods when most iconic films were made?
+
+-    🎬 **Who’s the director behind the hits?**\
+    Do some directors consistently create blockbuster or critically acclaimed movies?
+
+-    ⏱️📊 **Do runtime, ratings & reviews connect?**\
+    Is there a pattern linking movie length with how it's rated or reviewed?
+
+-    🍅🍿 **Critics vs Audience – do they agree?**\
+    What's the relationship between Tomato Scores and Popcorn Scores?
+
+-    🎭 **What genres rule the charts?**\
+    Are certain genres more popular or consistently successful?
+
+### 🔍 Data Collection: From Reel to Real
+
+Every great story begins with a good source—and ours starts at **Rotten Tomatoes**, the iconic hub where movie critics and fans converge. To build a meaningful cinematic exploration platform, we curated a rich and diverse list of the **Top 300 highest-rated movies**, spanning generations, cultures, and genres. Using **web scraping techniques**, we extracted key attributes for each movie.
+
+### 🧽 Data Cleaning
+
+While the data collected was comprehensive, some preprocessing was necessary for smooth analysis. The most significant transformation involved the **`Runtime`** column, originally in mixed text format (e.g., “2h 42m”). We converted all runtimes into **total minutes**, allowing for accurate and consistent numeric comparison across films.
+
+No major missing values or inconsistencies were found, making the dataset readily usable for further analysis and visualization.
+
+### 🧩 Data Structure
+
+After cleaning, the final dataset consists of **300 movies** with the following structured variables:
+
+-    `Rank`
+
+-    `Name`
+
+-    `Director`
+
+-    `Release.Year`
+
+-    `Runtime`
+
+-    `Tomato.Score`
+
+-    `Popcorn.Score`
+
+-    `No.of.Reviews`
+
+-    `No.of.Ratings`
+
+-    `Genre`
+
+-    `total_runtime` (in minutes, numeric)
+
+## 🎥 **Movie Data Analysis Script**
+
+```{r}
+# Load required libraries
+library(tidyverse)
+library(ggplot2)
+load("df.RData")
+df=df
+
+# Ensure numeric columns
+df$Tomato.Score <- as.numeric(df$Tomato.Score)
+df$Popcorn.Score <- as.numeric(df$Popcorn.Score)
+df$No.of.Reviews <- as.numeric(df$No.of.Reviews)
+df$No.of.Ratings <- as.numeric(df$No.of.Ratings)
+df$total_runtime <- as.numeric(df$`total_runtime(in minutes)`)
+df$Release.Year <- as.numeric(df$Release.Year)
+
+```
+
+### 🕰️ **1. When did the magic happen?**
+
+*Are there time periods when most iconic films were made?*
+
+```{r}
+ggplot(df, aes(x = Release.Year)) +
+  geom_histogram(binwidth = 5, fill = "#69b3a2", color = "black") +
+  labs(
+    title = "Distribution of Hit Movies by Release Year",
+    x = "Release Year",
+    y = "Number of Movies"
+  ) +
+  theme_minimal()
+
+```
+
+Most hit movies were made after 1980, while very few appeared before 1920, likely due to the limited popularity and technology of cinema at that time. However, many classics from the 1950s to 1980s still stand out as timeless blockbusters, cherished even today.
+
+### 🎬 **2. Who’s the director behind the hits?**
+
+*Do some directors consistently create blockbusters or critically acclaimed movies?*
+
+```{r}
+top_directors <- df %>%
+  group_by(Director) %>%
+  summarise(No_of_Hits = n()) %>%
+  arrange(desc(No_of_Hits)) %>%
+  top_n(10, No_of_Hits)
+
+ggplot(top_directors, aes(x = reorder(Director, No_of_Hits), y = No_of_Hits)) +
+  geom_col(fill = "#ff7f50") +
+  coord_flip() +
+  labs(
+    title = "Top Directors with Most Hit Movies",
+    x = "Director",
+    y = "Number of Movies"
+  ) +
+  theme_minimal()
+
+```
+
+As expected, legendary directors like Kurosawa, Hitchcock, and Spielberg dominate the list of famous films. While renowned names like Fellini appear lower in the list, this is likely influenced by the era they worked in, when fewer people watched movies.
+
+### ⏱️📊 **3. Do runtime, ratings & reviews connect?**
+
+*Is there a pattern linking movie length with how it's rated or reviewed?*
+
+```{r}
+# Runtime vs Number of Reviews
+df %>%
+  ggplot(aes(x = total_runtime, y = No.of.Reviews)) +
+  geom_point(alpha = 0.6, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Runtime vs Number of Reviews",
+    x = "Runtime (minutes)",
+    y = "Number of Reviews"
+  ) +
+  theme_minimal()
+
+# Ratings vs Reviews
+df %>%
+  ggplot(aes(x = No.of.Ratings, y = No.of.Reviews)) +
+  geom_point(alpha = 0.6, color = "purple") +
+  geom_smooth(method = "lm", se = FALSE, color = "darkgreen") +
+  labs(
+    title = "Ratings vs Reviews",
+    x = "Number of Ratings",
+    y = "Number of Reviews"
+  ) +
+  theme_minimal()
+
+```
+
+As we observe a positive correlation between runtime and the number of reviews, it suggests that, in general, people tend to prefer longer movies. Also as the no of reviews increases the rating also increases.
+
+### 🍅🍿 **4. Critics vs Audience – do they agree?**
+
+*What's the relationship between Tomato Scores and Popcorn Scores?*
+
+```{r}
+ggplot(df, aes(x = Tomato.Score, y = Popcorn.Score)) +
+  geom_point(alpha = 0.6, color = "#ff6347") +
+  geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+  labs(
+    title = "Tomato Score vs Popcorn Score",
+    x = "Tomato Score",
+    y = "Popcorn Score"
+  ) +
+  theme_minimal()
+
+# Correlation coefficient
+cor(df$Tomato.Score, df$Popcorn.Score, use = "complete.obs")
+
+```
+
+Here, the Tomato Score (critic score) and Popcorn Score (audience score) show a negative correlation. This suggests that movies with fresh or unconventional ideas may receive lower audience ratings, possibly because new concepts often come with imperfections. It's natural for something innovative to face mixed reactions at first.
+
+### 🎭 **5. What genres rule the charts?**
+
+*Which genres appear most frequently among hit films?*
+
+```{r}
+# Separate multiple genres and count top 10
+df_genre <- df %>%
+  separate_rows(Genre, sep = ",\\s*") %>%
+  group_by(Genre) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  top_n(10, Count)
+
+ggplot(df_genre, aes(x = reorder(Genre, Count), y = Count)) +
+  geom_col(fill = "#9370db") +
+  coord_flip() +
+  labs(
+    title = "Top Genres Among Hit Movies",
+    x = "Genre",
+    y = "Number of Movies"
+  ) +
+  theme_minimal()
+
+```
+
+Drama and comedy emerge as the most popular genres among hit movies. This indicates that audiences are consistently drawn to emotionally engaging stories and light-hearted entertainment, making these genres both widely appealing and commercially successful.
+
+### 📌 **Conclusion**
+
+Our analysis shows that most hit movies emerged after 1980, with legendary directors and popular genres like drama and comedy leading the way. Longer films tend to attract more reviews, and critics and audiences often disagree—especially on fresh ideas. The interactive **Shiny app** makes exploring these trends fun and insightful for any movie lover.
